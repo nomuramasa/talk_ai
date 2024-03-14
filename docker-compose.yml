@@ -1,0 +1,11 @@
+version: '3'
+
+services:
+  nginx:
+    build: ./
+    image: nginx
+    container_name: talk-ai
+    ports:
+      - 8000:80
+    volumes:
+      - ./src:/usr/share/nginx/html
