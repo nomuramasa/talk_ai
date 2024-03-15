@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport"
+        content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.3.4/axios.min.js"></script>
+    <title>キャラクターと会話</title>
+</head>
+
+<body>
+    <main>
+        <button type="button" class="start">音声認識開始</button>
+        <div class="output-user-voice"></div>
+        <audio class="audio"></audio>
+    </main>
+    <script>
+        // ブラウザで入力音声を認識
+        const recognition = new webkitSpeechRecognition();
+        recognition.lang = "ja";
+        recognition.onresult = async ({ results }) => {
+            const outputUserVoice = document.querySelector(".output-user-voice");
+            outputUserVoice.textContent = results[0][0].transcript;
+
+            const responseText = await requestChatAPI(results[0][0].transcript);
+
+            await createAudio(responseText);
+        };
+
+        const startButton = document.querySelector(".start");
+        startButton.addEventListener("click", () => {
+            recognition.start();
+        });
+
+        // ChatGPTのAPIへリクエスト
+        const api_key = "";
+
+        async function requestChatAPI(text) {
+            const headers = {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${api_key}`,
+            };
+
+            const messages = [
+                {
+                    role: "user",
+                    content: text,
+                },
+            ];
+
+            const payload = {
+                model: "gpt-3.5-turbo",
+                max_tokens: 500,
+                messages: messages,
+            };
+            const response = await axios.post(
+                "https://api.openai.com/v1/chat/completions",
+                payload,
+                {
+                    headers: headers,
+                }
+            );
+            return response.data.choices[0].message.content;
+        }
+
+        // VOICEVOXのWebAPIで音声合成
+        async function createAudio(text) {
+            const data = await createVoice(text);
+            const audio = document.querySelector(".audio");
+            audio.src = URL.createObjectURL(data);
+            audio.play();
+        }
+
+        async function createQuery(text) {
+            const response = await axios.post(
+                `http://localhost:50021/audio_query?speaker=1&text=${text}`
+            );
+            return response.data;
+        }
+
+        async function createVoice(text) {
+            const query = await createQuery(text);
+            const response = await axios.post(
+                "http://localhost:50021/synthesis?speaker=1",
+                query,
+                { responseType: "blob" }
+            );
+            return response.data;
+        }
+
+    </script>
+</body>
+
+</html>
