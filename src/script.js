@@ -1,4 +1,4 @@
-import { API_KEY, CHARACTOR_DISCRIPTION } from './const.js';
+import { API_KEY, SEPEAKER_NUMBER, CHARACTOR_DISCRIPTION } from './const.js';
 
 const app = Vue.createApp({
     data() {
@@ -84,7 +84,7 @@ const app = Vue.createApp({
          */
         async createAudioQuery(aiResponse) {
             const response = await axios.post(
-                `${this.VOICEVOX_AUDIO_QUERY_API_URL}?speaker=29&text=${aiResponse}`
+                `${this.VOICEVOX_AUDIO_QUERY_API_URL}?speaker=${SEPEAKER_NUMBER}&text=${aiResponse}`
             );
             return response.data;
         },
@@ -96,7 +96,7 @@ const app = Vue.createApp({
          */
         async synthesisVoice(audioQuery) {
             const response = await axios.post(
-                `${this.VOICEVOX_SYNTHESIS_API_URL}?speaker=29`,
+                `${this.VOICEVOX_SYNTHESIS_API_URL}?speaker=${SEPEAKER_NUMBER}`,
                 audioQuery,
                 { responseType: 'blob' }
             );
