@@ -1,0 +1,11 @@
+.mb-12 {
+    margin-bottom: 12px;
+}
+
+.output-user-voice {
+    border: 1px solid #aaaaaa;
+    width: 100%;
+    height: 200px;
+    border-radius: 0.25rem;
+    vertical-align: top;
+}
