@@ -7,6 +7,7 @@ const app = Vue.createApp({
             VOICEVOX_AUDIO_QUERY_API_URL: 'http://localhost:50021/audio_query',
             VOICEVOX_SYNTHESIS_API_URL: 'http://localhost:50021/synthesis',
             userInputText: '',
+            conversationHistory: [],
         }
     },
     methods: {
@@ -34,14 +35,16 @@ const app = Vue.createApp({
          * 入力したテキストに対するOpenAIからの回答を、VOICEBOXのキャラクターに喋ってもらう
          * @param {string}
          */
-        async charactorSpeak(text) {
-            const aiResponse = await this.requestAi(text);
-            const audioQuery = await this.createAudioQuery(aiResponse);
+        async charactorSpeak(userInputText) {
+            const gptAnswer = await this.requestGpt(userInputText);
+            const audioQuery = await this.createAudioQuery(gptAnswer);
             const synthesizedVoice = await this.synthesisVoice(audioQuery);
 
             const audio = document.querySelector('.audio');
             audio.src = URL.createObjectURL(synthesizedVoice);
             audio.play();
+
+            this.saveConversationHistory(gptAnswer);
         },
 
         /**
@@ -49,16 +52,13 @@ const app = Vue.createApp({
          * @param {string}
          * @returns {string} - OpenAIのAPIからの回答
          */
-        async requestAi(text) {
+        async requestGpt(userInputText) {
             const response = await axios.post(
                 this.OPEN_AI_API_URL,
                 {
                     model: 'gpt-3.5-turbo',
                     max_tokens: 500,
-                    messages: [
-                        {role: 'user',   content: text},
-                        {role: 'system', content: CHARACTOR_DISCRIPTION},
-                    ],
+                    messages: this.createMessages(userInputText),
                 },
                 {
                     headers: {
@@ -72,13 +72,31 @@ const app = Vue.createApp({
         },
 
         /**
+         * 過去の対話を含めたメッセージの配列を作成
+         * @param {string} - ユーザーが入力したテキスト
+         * @returns {Array} - 過去の対話を含めたメッセージの配列
+         */
+        createMessages(userInputText) {
+            const messages = [{ role: 'system', content: CHARACTOR_DISCRIPTION }];
+
+            // 過去の対話を追加
+            this.conversationHistory.forEach(item => {
+                messages.push({ role: item.role, content: item.content });
+            });
+
+            messages.push({ role: 'user', content: userInputText });
+
+            return messages;
+        },
+
+        /**
          * VOICEBOXのAPIで音声合成用のクエリを取得
          * @param {string}
          * @returns {string} - 音声合成用クエリ
          */
-        async createAudioQuery(aiResponse) {
+        async createAudioQuery(gptAnswer) {
             const response = await axios.post(
-                `${this.VOICEVOX_AUDIO_QUERY_API_URL}?speaker=${SPEAKER_NUMBER}&text=${aiResponse}`
+                `${this.VOICEVOX_AUDIO_QUERY_API_URL}?speaker=${SPEAKER_NUMBER}&text=${gptAnswer}`
             );
             return response.data;
         },
@@ -95,6 +113,17 @@ const app = Vue.createApp({
                 { responseType: 'blob' }
             );
             return response.data;
+        },
+
+        /**
+         * 今回の対話を保存
+         * @param {string} - GPTからの回答
+         */
+        async saveConversationHistory(gptAnswer) {
+            this.conversationHistory.push(
+                { role: 'user',   content: this.userInputText },
+                { role: 'system', content: gptAnswer },
+            );
         },
     }
 });
