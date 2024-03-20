@@ -1,4 +1,4 @@
-import { API_KEY, SEPEAKER_NUMBER, CHARACTOR_DISCRIPTION } from './const.js';
+import { API_KEY, SPEAKER_NUMBER, CHARACTOR_DISCRIPTION } from './const.js';
 
 const app = Vue.createApp({
     data() {
@@ -56,14 +56,8 @@ const app = Vue.createApp({
                     model: 'gpt-3.5-turbo',
                     max_tokens: 500,
                     messages: [
-                        {
-                            role: 'user',
-                            content: text,
-                        },
-                        {
-                            role: 'system',
-                            content: CHARACTOR_DISCRIPTION,
-                        },
+                        {role: 'user',   content: text},
+                        {role: 'system', content: CHARACTOR_DISCRIPTION},
                     ],
                 },
                 {
@@ -84,19 +78,19 @@ const app = Vue.createApp({
          */
         async createAudioQuery(aiResponse) {
             const response = await axios.post(
-                `${this.VOICEVOX_AUDIO_QUERY_API_URL}?speaker=${SEPEAKER_NUMBER}&text=${aiResponse}`
+                `${this.VOICEVOX_AUDIO_QUERY_API_URL}?speaker=${SPEAKER_NUMBER}&text=${aiResponse}`
             );
             return response.data;
         },
 
         /**
-         * VOICEBOXのAPIで音声合成したデータを取得
+         * VOICEBOXのAPIで合成した音声データを取得
          * @param {string}
-         * @returns {string} - オーディオ
+         * @returns {string} - 音声データ
          */
         async synthesisVoice(audioQuery) {
             const response = await axios.post(
-                `${this.VOICEVOX_SYNTHESIS_API_URL}?speaker=${SEPEAKER_NUMBER}`,
+                `${this.VOICEVOX_SYNTHESIS_API_URL}?speaker=${SPEAKER_NUMBER}`,
                 audioQuery,
                 { responseType: 'blob' }
             );
