@@ -10,7 +10,20 @@ const app = Vue.createApp({
             conversationHistory: [],
         }
     },
+
+    mounted() {
+        this.setCharactorImage();
+    },
+
     methods: {
+        /**
+         * キャラクターの画像を表示
+         */
+        setCharactorImage() {
+            const charactorImg = document.querySelector('.charactor-img');
+            charactorImg.src = `img/${SPEAKER_NUMBER}.png`;
+        },
+
         /**
          * ユーザーの音声を認識
          */

@@ -10,10 +10,15 @@
 
 <body>
     <div id="app">
-        <button type="button" class="voice-input mb-12" @click="recognizeVoice">音声入力</button>
-        <input class="output-user-voice mb-12" v-model="userInputText" placeholder="テキスト入力もできます">
-        <button type="button" class="submit-text" @click="submitText">送信</button>
-        <audio class="audio" ref="audio"></audio>
+        <div class="text-block">
+            <button type="button" class="voice-input mb-12" @click="recognizeVoice">音声入力</button>
+            <input class="output-user-voice mb-12" v-model="userInputText" placeholder="テキスト入力もできます">
+            <button type="button" class="submit-text" @click="submitText">送信</button>
+            <audio class="audio" ref="audio"></audio>
+        </div>
+        <div class="charactor-block">
+            <img class="charactor-img">
+        </div>
     </div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.3.4/axios.min.js"></script>
